@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Открытка</title>
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #ddadc7;
+        flex-direction: column;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+        position: relative;
+      }
+      .card {
+        background: rgb(247, 152, 152);
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        position: relative;
+        z-index: 10;
+      }
+      .card img,
+      .card video {
+        width: 400px;
+        height: 300px;
+        object-fit: contain;
+        border-radius: 10px;
+        display: none;
+        margin-top: 10px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .btn {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background: #6c1b24;
+        color: rgb(209, 155, 165);
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .btn:hover {
+        background: #bf879e;
+      }
+      .heart {
+        position: absolute;
+        font-size: 24px;
+        color: #ff69b4;
+        animation: fall 3s linear infinite;
+      }
+
+      @keyframes fall {
+        0% {
+          top: -10%;
+          opacity: 1;
+        }
+        100% {
+          top: 100%;
+          opacity: 0;
+        }
+      }
+
+      .background-area {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding-top: 350px;
+        padding-bottom: 80px;
+        box-sizing: border-box;
+        z-index: -1;
+      }
+      .signature {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #d84e87;
+        font-style: italic;
+        opacity: 0.8;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <h2>тут для тебя подарочек</h2>
+      <button class="btn" id="toggleBtn" onclick="toggleMedia()">тыкни</button>
+      <img id="postcard" src="" alt="Открытка" />
+      <video id="video" controls>
+        <source src="1.mp4" type="video/mp4" />
+      </video>
+      <div class="signature">сделано с любовью</div>
+    </div>
+
+    <div class="background-area"></div>
+
+    <script>
+      const images = [
+        "https://i.pinimg.com/736x/3c/57/2c/3c572cc6028fc5ba098b7b42a4486554.jpg",
+        "https://i.pinimg.com/736x/9a/f4/f2/9af4f28db500eed2f25afb40e2c21397.jpg",
+        "https://i.pinimg.com/736x/1e/71/b2/1e71b2ce85d934ab8060fb9b6558bad0.jpg",
+        "https://i.pinimg.com/736x/59/3c/0c/593c0ccd0c78f8db7d130770284cd123.jpg",
+        "https://i.pinimg.com/736x/81/c4/f2/81c4f21bfdd2492c3a7713994a62d720.jpg",
+        "https://i.pinimg.com/736x/4c/29/e5/4c29e58841964d57febbf7949c019670.jpg",
+        "https://i.pinimg.com/736x/4e/d5/e7/4ed5e7cf7229a32b3fad49526578188d.jpg",
+        "https://i.pinimg.com/736x/81/81/2a/81812aae09b865fcc94203d6a74ab9f5.jpg",
+        "https://i.pinimg.com/736x/63/27/a4/6327a4d72f5ed824a50e4a02a778b823.jpg",
+        "https://i.pinimg.com/736x/db/78/66/db78663db02234b78a669ebcf2581714.jpg",
+        "https://i.pinimg.com/736x/db/82/e7/db82e79233d4c7fb768106d655ab8429.jpg",
+        "https://i.pinimg.com/736x/5c/90/a2/5c90a20b9f639e494588952406cd0846.jpg",
+        "https://i.pinimg.com/736x/52/9c/cc/529ccc25807ba5c4d560e0aaa5206e5f.jpg",
+        "https://i.pinimg.com/736x/f9/9e/c4/f99ec4b5d6f18be7b0ee67196c07303c.jpg",
+        "https://i.pinimg.com/736x/7e/0f/19/7e0f19bc2f9a303e768787639d0145d0.jpg",
+        "https://i.pinimg.com/736x/68/e0/30/68e03065a1d42ca9ac0d81f1b84924f6.jpg",
+        "https://i.pinimg.com/736x/6f/d4/4f/6fd44f63b07ad132ad7b0a6095984372.jpg",
+        "https://i.pinimg.com/736x/e5/db/68/e5db6804f85598147a0e99b3e53c1505.jpg",
+        "https://i.pinimg.com/736x/05/88/8a/05888a4222f840152ff388a51d241571.jpg",
+      ];
+
+      let clickCount = 0; // Счётчик кликов
+      let img = document.getElementById("postcard");
+      let btn = document.getElementById("toggleBtn");
+      let video = document.getElementById("video");
+      const backgroundArea = document.querySelector(".background-area");
+
+      let imageIndex = 0; // Индекс для картинок
+      let allImagesShown = false; // Флаг, который будет отслеживать, что все картинки показаны
+      let heartsArray = []; // Массив для хранения сердечек, чтобы повторно отображать их
+
+      function createHearts() {
+        for (let i = 0; i < 20; i++) {
+          let heart = document.createElement("div");
+          heart.classList.add("heart");
+          heart.textContent = "💗";
+          heart.style.left = `${Math.random() * 100}%`;
+          heart.style.animationDuration = `${Math.random() * 2 + 3}s`; // Рандомная продолжительность
+          backgroundArea.appendChild(heart);
+          heartsArray.push(heart); // Сохраняем созданные сердечки в массив
+        }
+      }
+
+      function toggleMedia() {
+        clickCount++; // Увеличиваем счётчик кликов
+
+        if (clickCount % 2 !== 0) {
+          // Если нечетное количество кликов, показываем картинку
+          img.src = images[imageIndex];
+          img.style.display = "block"; // Показываем картинку
+          btn.textContent = "скрыть и показать еще"; // Изменяем текст кнопки при открытии картинки
+
+          // Создание сердечек, если их еще нет
+          if (heartsArray.length === 0) {
+            createHearts(); // Если сердечки еще не созданы, создаем их
+          } else {
+            // Если сердечки уже созданы, показываем их
+            heartsArray.forEach((heart) => (heart.style.display = "block"));
+          }
+
+          // Обновляем индекс для следующей картинки
+          imageIndex = (imageIndex + 1) % images.length;
+
+          // Если все картинки были показаны, показываем видео
+          if (imageIndex === 0 && !allImagesShown) {
+            allImagesShown = true;
+            setTimeout(() => {
+              video.style.display = "block"; // Показываем видео
+              video.play(); // Воспроизводим видео
+              btn.textContent = "конец!"; // Меняем текст кнопки на "конец!"
+              btn.style.display = "none"; // Скрываем кнопку после видео
+            }, 1000); // Задержка для плавного перехода
+          }
+        } else {
+          // Если чётное количество кликов, скрываем картинку
+          img.style.display = "none"; // Скрываем картинку
+          btn.textContent = "тыкни"; // Меняем текст кнопки обратно
+          // Сердечки продолжают падать, их не скрываем
+        }
+      }
+    </script>
+  </body>
+</html>
